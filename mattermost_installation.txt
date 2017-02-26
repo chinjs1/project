@@ -19,7 +19,7 @@ Install PostgreSQL:
 
 4. Create the Mattermost database -
 
-	postgres=# CREATE DATABASE mattermost;ll
+	postgres=# CREATE DATABASE mattermost;
 
 
 5. Create the Mattermost user e.g 'user'
