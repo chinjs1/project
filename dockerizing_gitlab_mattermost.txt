@@ -1,0 +1,152 @@
+--- Install Docker ---
+
+1. Add Docker’s official GPG key:
+	curl -fsSL https://apt.dockerproject.org/gpg | sudo apt-key add -
+
+2. Verify that the key ID is 58118E89F3A912897C070ADBF76221572C52609D.
+	apt-key fingerprint 58118E89F3A912897C070ADBF76221572C52609D
+
+3. Use the following command to set up the stable repository.
+	sudo add-apt-repository "deb https://apt.dockerproject.org/repo/ ubuntu-$(lsb_release -cs) main"
+
+4. Update the apt package index.
+	sudo apt-get update
+
+5. Install the latest version of Docker 
+	sudo apt-get -y install docker-engine
+
+6. sudo usermod -aG docker <user-name>
+
+_____________________________________________________________________________________________________________________________________________
+
+--- Install Docker Compose ----
+1. Refer to https://github.com/docker/compose/releases
+	Run as root to install sudo -i
+
+_____________________________________________________________________________________________________________________________________________
+
+--- Reconfigure SSH on the GitLab Machine ----
+1. Change the host's SSH port to a higher port, so the gitlab docker can use port 22
+	sudo nano /etc/ssh/sshd_config
+		Change Port to 2222
+
+2. Restart the SSH service 
+	sudo service ssh restart
+
+_____________________________________________________________________________________________________________________________________________
+
+--- GitLab Backup ---
+
+1. tar -czvf gitlab-backup.tar.gz /etc/gitlab /var/log/gitlab /var/opt/gitlab
+
+--- Mattermost Backup ---
+
+1. tar -czvf mattermost-backup.tar.gz /home/ubutnu/mattermost
+	sudo -i -u postgres
+  	pg_dump -c mattermost > mattermost.bak
+  	exit
+
+	cp /var/lib/postgresql/mattermost.bak .
+	*Ref https://www.digitalocean.com/community/tutorials/how-to-backup-postgresql-databases-on-an-ubuntu-vps https://www.postgresql.org/docs/9.5/static/app-pgdump.html
+
+_____________________________________________________________________________________________________________________________________________
+
+--- AWS Connection ---
+
+1. Open PuTTY, hostname is gitlab.op-bit.nz port 22
+	a. Click on SSH > Auth and then browse for the ssh key (.ppk)
+	b. log in as ubuntu
+
+_____________________________________________________________________________________________________________________________________________
+
+--- Key exchange authentication ---
+
+1. Open WinSCP
+	a. Hostname: mattermost.op-bit.nz
+	b. username: ubuntu
+	c. Click Advanced > SSH > Authentication > browse the private key
+	d. download .bak file and backup.tar.gz
+
+*** REPEAT SAME STEPS FOR GITLAB USING PROPER CREDENTIALS ***
+
+_____________________________________________________________________________________________________________________________________________
+
+--- Restore backup ---
+
+1. Login to the test machine (gitlab and mattermost) 
+	a. put the required backup files in the home dir
+	b. ensure to put the docker-compose file into a sensibly named folder e.g Gitlab-Docker
+	c. Go back to PuTTY and unpack .tar on both machines (note: leave the .bak)
+		use: tar -xzvf <file-name>
+	
+	Making the storage folders for the containter: 
+
+	on gitlab:
+	> sudo -i
+	> cd to home
+	> make a directory called 'srv'
+	> move to that directory
+	> make a dir called 'gitlab' and cd to it
+	> make 3 folders called config, logs, data
+	> move to home/user and check the right files are in there
+	> cd etc/gitlab and check the right files are there
+	> move all files to /srv/gitlab/config
+	> cd back to /home/usr/var and ls
+	> cd to opt and move into gitlab, once there move all files to /srv/gitlab/data/
+	> cd home
+	
+	Make the container: 
+	> cd to the gitlab folder you created earlier (Gitlab-Docker)
+	> run the command - docker-compose up (this pulls the pre-made image)
+	> exit out and sudo chmod 2770 /srv/gitlab/data/git-data/repositories
+	> navigate to /srv/gitlab/data/gitlab-rails/shared and mkdir registry
+	> re-run the docker-compose start
+	> once started docker-compose exec web update-permissions
+	> sudo nano /srv/gitlab/config/gitlab.rb and comment out all the nginx and the external URL (only for the test environment)
+	> docker-compose up -d (this restarts the container running in the background)
+
+_____________________________________________________________________________________________________________________________________________
+
+--- Mattermost Backups ---
+
+1. Clone the repo: git clone https://github.com/mattermost/mattermost-docker.git -b team-and-enterprise
+
+2. Build the image: docker-compose build
+
+3. Run the up so it creates the database and configurations required to restore backup: docker-compose up
+
+4. Move the database backup to the volume that the database container has access too: mv mattermost.bak mattermost-docker/volumes/db/var/lib/postgresql/data/
+
+5. Start the database container(make sure you are in the docker folder): docker-compose start db
+
+6. Make a bash session in the db container as the user postgres: docker-compose exec --user postgres db /bin/bash
+	: cd /var/lib/postgresql/data/ 
+	: psql mattermost < mattermost.bak (move whatever is in the .bak to the db)
+
+_____________________________________________________________________________________________________________________________________________
+
+--- Restore the data ---
+ 
+1. Move the config.json file to correct place: cd home/ubuntu/mattermost/config
+	- move the file to volumes config: sudo mv config.json ../../../../mattermost-docker/volumes/app/mattermost/config/
+	- move all the data to volumes data: cd home/ubuntu/mattermost/data and then sudo mv config.json ../../../../mattermost-docker/volumes/app/mattermost/config/
+
+2. Modify the config file (in the test environment): 
+	- cd volumes/app/mattermost/config/
+	- sudo nano config.json (change the SqlSettings < DataSource: give the password and remove the ip address and replace it with the database db)
+		change the FileSettings < Directory to /mattermost/data/
+
+3. Ensure to be in the directory that docker-compose.yml is: cd mattermost-docker and run docker-compose up
+
+4. Test in your web browser once finished
+
+_____________________________________________________________________________________________________________________________________________
+
+
+
+
+
+
+
+	
+
