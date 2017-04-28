@@ -1,0 +1,144 @@
+Create a group:
+_______________
+
+- Click on Icinga Director < Notifications < Users/Contacts < Groups < Add
+- Add the name of the group e.g. SysAdmins.
+	- Store.
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+Create a template for users:
+____________________________
+
+- Click on Icinga Director < Notifications < Users/Contacts < Templates < Add
+- Give a template name e.g. BIT Platform member,
+	- Add them to the groupname e.g. SysAdmins,
+	- Allow notifications to be sent,
+	- Add States,
+	- Add Transition Types,
+	- Store
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+Adding Icinga Users:
+____________________
+
+- Click on Icinga Director < Notifications < Users/Contacts < Add
+- Add required users that you would like emails to be sent to.
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+Create the email to be sent to the OP SMPT server:
+__________________________________________________
+
+*** INSTALL ***
+sudo apt-get update
+sudo apt-get install postfix mailutils
+
+at the prompt - select internet site and leave the default name.
+
+sudo nano /etc/postfix/main.cf
+	find relayhost and add the following: [smtp.office365.com]:587
+	fix these: mynetworks = 127.0.0.0/8
+			   inet_interfaces = loopback-only
+	add to the end of the file: 
+	smtp_use_tls = yes
+	smtp_always_send_ehlo = yes
+	smtp_sasl_auth_enable = yes
+	smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+	smtp_sasl_security_options = noanonymous
+	smtp_sasl_tls_security_options = noanonymous
+	smtp_tls_security_level = encrypt
+	smtp_generic_maps = hash:/etc/postfix/generic
+	smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+	
+sudo nano /etc/postfix/sasl_passwd
+	Add this line to the file -> [smtp.office365.com]:587 bitplatformadmin@op.ac.nz:[XXXXXXXXX]
+	
+run these commands:
+	sudo chown root:root /etc/postfix/sasl_passwd
+	sudo chmod 0600 /etc/postfix/sasl_passwd
+	sudo postmap /etc/postfix/sasl_passwd
+	
+sudo nano /etc/postfix/generic
+	Add these 2 lines
+	root@localdomain bitplatformadmin@op.ac.nz
+	@localdomain bitplaformadmin@op.ac.nz
+	
+run these commands:
+	sudo chown root:root /etc/postfix/generic
+	sudo chmod 0600 /etc/postfix/generic
+	sudo postmap /etc/postfix/generic
+
+restart the service:
+	sudo service postfix restart
+	Test it: echo "This is a test body" | mail -s "Relay Test Email" chinjs1@student.op.ac.nz -a "FROM:bitplatformadmin@op.ac.nz"
+	
+------------------------------------------------------------------------------------------------------------------------------------
+
+Using the email to send to the right address:
+_____________________________________________
+
+- Open up the icinga2 web interface
+	Go to Icinga Director and create a notification template for the host & service email
+	
+	Email Notification Template:
+		- Add a user group,
+		- Add a notification command,
+		- Add states Up & Down,
+		- Add all transition types and store.
+		
+	Service Notification Template:
+		- Add a user group,
+		- Add a notification command,
+		- Add states Critical, OK, Unknown and Warning,
+		- Add all transition types.
+		
+	Email Host:
+		- Create a host name,
+		- Import the parent template e.g. Email Notification Template,
+		- Apply it to the 'Hosts',
+		- Assign it to the zone and give the monitoring address,
+		- Store.
+		
+	Email Service:
+		- Create a host name,
+		- Import the parent template,
+		- Apply it to the 'Services',
+		- Assign it to the zone and give the monitoring address,
+		- Store.
+		
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+Setup staging domain in internal DNS server -
+	- Login to the AD server.
+	- Click on Tools < DNS < Forward Lookup Zones < Right Click < New Host < Add Gitlab and Mattermost.
+
+Change DNS IP on machine -
+	- Go to network and sharing
+	- Click Ethernet < Properties < IPv4 < Properties < change DNS addresses to 10.118.27.130 and 10.118.27.132
+	
+Creating API key for AWS bot with read only privileges -
+	- Login to AWS https://355631893594.signin.aws.amazon.com/console
+	- Search for 'IAM'
+	- Click on Users
+	- Add a username < Access type set to Pragmatic access
+	- Create group with appropriate name
+	- Search for EC2 and tick AmazonEC2ReadOnlyAccess
+	- Search for Route53 and tick AmazonRoute53ReadOnlyAccess
+	- Create group
+
+ 
+

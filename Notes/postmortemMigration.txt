@@ -1,0 +1,28 @@
+Postmortem for migration of GL and MM:
+
+We dockerized our production servers, GL and MM. The reason for doing this is so we have a current & up-to-date version for testing purposes, an up-to-date container
+for us to roll back to if anything drastic happens and for ease of management by having it dockerized.
+
+user communication:
+	
+	We posted announcements on GL & MM 3 days prior to the maintainence took place. Another thing we could have done to notify people better is to post on the Slack
+	channel and the BIT FaceBook page.
+
+steps involved:
+	
+	As we had already deployed the dockerized versions in the testing environments, we followed the instructions that were already prepared. This included the
+	following: 
+	
+		- Installing docker,
+		- Installing docker-compose,
+		- Pulling the relevant service repo from GL containing the docker files,
+		- Setup the new machines, once they are ready - take the old machine down (the purpose of this is so you can pull the repo from GL),
+		- Run scripts to backup GL/MM on the old machine, copy it to the new machine, ran the restore script * https://gitlab.op-bit.nz/bit-platform/BIT-Useful-Scripts/tree/master,
+		- Re route the DNS to the new IP address of the new machine,
+		- Test that everything was working correctly,
+		- Annoucned that services were back up and running.
+		
+lessons learned:
+	
+	We could have checked for open ports before deployment. An issue we had was wanting to re-direct SSH to port 2222 but the OP firewall was blocking that. How we got around
+	this issue was to contact ISS about opening some potential ports for us to use.

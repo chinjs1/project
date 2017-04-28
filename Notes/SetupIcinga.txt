@@ -1,0 +1,46 @@
+Setting up Icinga2 -
+
+Found the Icinga2 docs: https://docs.icinga.com/icinga2/latest/doc/module/icinga2/toc#!/icinga2/latest/doc/module/icinga2/chapter/getting-started
+
+2.1
+- Download the repo key and add it to the machine.
+- Add the repo to the apt sources.
+- Update it.
+
+2.1.2
+- Install Icinga2.
+
+2.2
+- Install the nagios-plugins
+
+2.3.2
+- Start the service
+
+2.4.2
+- Install syntax highlighting for nano
+
+2.5.1
+- Install MySQL database server
+- Install the modules
+- Setup the DB
+- Enable the module
+
+On the monitoring machine - 
+- modify the /etc/icinga2/features-enabled/ido-mysql.conf
+- modify the object to match the credienticals used when setting up mysql db
+	object IdoMysqlConnection "ido-mysql" {
+	  user = "icinga",
+	  password = "icinga",
+	  host = "localhost",
+	  database = "icinga"
+	}
+
+2.5.3
+- Install apache
+
+2.5.5
+- Setup the command pipe
+
+2.5.6
+- Install Icinga Web 2
+	had to run ->  sudo apt-get install libapache2-mod-php7 to enable PHP in apache

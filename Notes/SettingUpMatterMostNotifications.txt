@@ -1,0 +1,30 @@
+- Download the mattermost-icinga python script.
+
+--- On your monitoring machine ---
+
+*** INSTALL ***
+- wget https://raw.githubusercontent.com/Reamer/icinga2-mattermost/master/mattermost.py
+- change the modification to 777
+- move it to /usr/sbin/
+
+*** CREATE THE NOTIFICATION COMMAND ***
+- cd to /etc/icinga2/conf.d
+	edit commands.conf
+	in the README - copy all of task 2. 
+	change the command location to (/usr/sbin/mattermost.py)
+	set mattermost_channel to be the name of the channel you want.
+	set mattermost_oneline to be false.
+	set the mattermost_url to be the webhook you want to use.
+	repeat these steps for the host.
+	
+*** CREATE THE USER ***
+	edit users.conf
+	In the README - copy all of task 3.
+	
+*** APPLY NOTIFICATIONS TO USER ***
+	edit notifications.conf
+	In the README - copy all of task 4 to the file.
+	
+	Restart the Icinga service and test it works.
+	
+
