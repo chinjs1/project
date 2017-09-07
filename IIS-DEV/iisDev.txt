@@ -1,0 +1,47 @@
+Installing IIS Server With WebDeploy, ASP.NET 4.5
+1. Once logged into the Windows Server 2012R2, Open Server Manager
+2. Manage -> Add Roles and Features -> Click Next until Select Server Roles
+3. Tick Web Server (IIS) -> On the Prompt Click Add Features -> Click Next, -> Click Next on Select features
+4. Click Next, until Select role services -> Tick the following: -> Then Click Next
+ - ASP.NET 4.5 (Under Application Development)
+ - Managment Service (Under Managment Tools)
+5. Click Install
+6. Once everything has installed
+7. Download a copy of Web Platform Installer from: https://www.microsoft.com/web/downloads/platform.aspx
+8. Launch the downloaded exe
+9. Click the Products Tab and then in the search box type `Web Deploy`
+10. Click Add on Web Deploy 3.6 for Hosting Servers, then Click install
+
+Granting Access for Web Deploy for users:
+To allow the users to web deploy we need to grant them write permissions to the folder that which the files will be stored, then grant them IIS Manager Permissions
+Pre Req:
+- Create a Group in which all the users that require permission will be a member of
+1. Open IIS Manager
+2. On the Tree view on the left expand until you can see Default Site (This maybe named differently, the icon is globe) Select the Site
+3. On the Right under Actions select Edit Permissions -> Select the security tab -> Select Edit -> Select Add -> Find the Group that has been created -> Click OK
+4. With the Group Selected Tick Full Control -> Click OK -> Click OK
+5. Back in IIS Manager select IIS Manager Permissions,
+ - Under Actions -> Click Allow User
+ - Ensure the Windows Radio Button is selected and -> click the Select Button
+ - Locate the User you wish to grant permissions
+ - Click Ok
+ - Click Ok
+
+
+--- Creating user on iis-dev ---
+
+1. Login to remote desktop:
+		enter username and pw
+
+2. Go to Server Manager:
+		click on Tools > Computer Management > Users > Add User
+
+--- Adding a user to a group ---
+
+1. Go to the Groups folder
+		click on the group you want (CommSoft Members)
+		Add > Advanced > Find Now > Click on the users you want to add
+
+--- Give permissions to iis manager ---
+
+1. Click on Tools > IIS Manager > Click on the server tree > IIS Manager Permissions > Allow User > Select > Advanced > Find Now > Select Users to be added.

@@ -1,0 +1,36 @@
+# Setup Apache/PHP with HTTPS
+
+1. Install the following packages ` apt-get install apache2 php7.0 libapache2-mod-php7.0`
+2. Enable the apache ssl mod `sudo a2enmod ssl` & restart the service ` sudo service apache2 restart`
+3. Make a directory to place the SSL certificates in `sudo mkdir /etc/apache2/ssl`
+4. Obtain SSL Certificates i.e. Self Signed/Lets Encrypt/etc.
+ - Place the .crt & .key files in the folder you created above `/etc/apache2/ssl`
+5. Edit the SSL site configuration file `sudo nano /etc/apache2/sites-available/default-ssl.conf`
+  - Add the following line below `ServerAdmin` -> `ServerName <SITEURL>` e.g. ServerName gateway.staging.op-bit.nz
+  - Edit the following lines to match the names of your ssl certificates
+  ```
+  SSLCertificateFile      /etc/apache2/ssl/apache.crt
+  SSLCertificateKeyFile   /etc/apache2/ssl/apache.key
+```
+ - Uncomment the following lines to disable HTTP keep-alive
+ ```
+ BrowserMatch "MSIE [2-6]" \
+               nokeepalive ssl-unclean-shutdown \
+               downgrade-1.0 force-response-1.0
+```
+6. Enable the SSL site `sudo a2ensite default-ssl.conf` & Restart the Apache Service `sudo service apache2 restart`
+7. Create a redirect from http:// to the https:// version
+  - Edit `sudo nano /etc/apache2/sites-available/000-default.conf`
+  - Add the following line after `ServerAdmin` -> `Redirect "/" "https://<SITEURL>/"`
+8. Enable mod_rewite so .htaccess files can be used
+ - `sudo a2enmod rewrite`
+ - Edit `sudo nano /etc/apache2/sites-available/default-ssl.conf`
+ - Add the following lines below `DocumentRoot`
+ ```
+ <Directory /var/www/html>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Require all granted
+</Directory>
+ ```
+- Restart the service `sudo service apache2 restart`

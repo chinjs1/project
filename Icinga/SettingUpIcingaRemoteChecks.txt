@@ -1,0 +1,13 @@
+--- Setup Remote Checks ---
+
+1) Disk Usage -
+
+
+
+2) CPU Load -
+
+3) Memory Usage -
+
+4) Memory Usage -
+
+5) Docker Status -

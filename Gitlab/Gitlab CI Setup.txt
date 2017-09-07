@@ -1,0 +1,76 @@
+# Setup Gitlab CI for project
+
+**The following will detail setup on a Debian/Linux machine
+
+1. Add the GitLab Repo to the machine running the app you wish to be integrated with Ci.
+`curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.deb.sh | sudo bash`
+ref: https://docs.gitlab.com/runner/install/
+
+2. Install the Gitlab Ci Runner `sudo apt-get install gitlab-ci-multi-runner`
+
+3. Register the runner with Gitlab, collect the details required from the Gitlab Repo `Settings-> CI/CD Pipelines`
+
+```
+sudo gitlab-ci-multi-runner register
+Running in system-mode.
+
+Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com/):
+https://gitlab.com/ci
+Please enter the gitlab-ci token for this runner:
+waMz_8e98VGyU_H6xZWN
+Please enter the gitlab-ci description for this runner:
+[Mattermost-Docker]:
+Please enter the gitlab-ci tags for this runner (comma separated):
+staging
+Whether to run untagged builds [true/false]:
+[false]: false
+Whether to lock Runner to current project [true/false]:
+[false]: true
+Registering runner... succeeded                     runner=waMz_8e9
+Please enter the executor: docker, ssh, virtualbox, docker+machine, docker-ssh+machine, docker-ssh, parallels, shell, kubernetes:
+shell
+Runner registered successfully. Feel free to start it, but if it's running already the config should be automatically reloaded!
+```
+4. Since we want to run `sudo` commands when the runner build's & deploy's we need to grant the `gitlab-runner` user sudo permissions.
+ - Add the user to the sudo group `sudo usermod -a -G sudo gitlab-runner`
+ - Set the user not to require a password for sudo
+    - Run `sudo visudo`
+    - Add this to the bottom of the file `gitlab-runner ALL=(ALL) NOPASSWD: ALL`
+ - If you want the runner to run docker commnads then also add them to the docker group `sudo usermod -aG docker gitlab-runner`
+
+5. Create a `.gitlab-ci.yml` file in the Repo.
+
+```
+build:
+ #Commands to run when deploying
+ stage: build
+ script:
+   - sudo cp -R * /home/user/mattermost-docker
+   - cd /home/user/mattermost-docker
+   - docker-compose build
+ #Only the staging branch
+ only:
+  - staging
+ #Only Run on runners with the following tags
+ tags:
+  - staging
+
+deploy:
+ stage: deploy
+ #Commands to run when deploying
+ script:
+   - cd /home/user/mattermost-docker
+   - docker-compose up -d
+ #Only the staging branch
+ only:
+  - staging
+  #Dont Auto run
+ when: manual
+#Only Run on runners with the following tags
+ tags:
+  - staging
+ ```
+
+ You have now configured a CI Build, Deploy CI.
+ When you want it to run commit a file in the staging branch,
+ this will trigger the runner to run the build stage, once ready you can manually deploy by clicking play in `Pipelines`

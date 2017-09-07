@@ -1,0 +1,48 @@
+# Configuring ADFS with SimpleSAML
+1. Get a copy of the `FederationMetadata.xml`
+  - e.g. `https://<adfs-server-url>/FederationMetadata/2007-06/FederationMetadata.xml`
+2. Login to the admin panel of SimpleSAML
+  - `https://<URL-INSTALLED>/simplesaml`
+3. We are going to get SimpleSAML to parse the `FederationMetadata.xml` file into SimpleSAML configuration
+ - Click the `Federation Tab`
+ - Under `Tools` select `XML to SimpleSAMLphp metadata converter`
+ - Paste the contents of `FederationMetadata.xml` or select the file in the file browser
+ - Click Parse
+ - Copy the output under the `saml20-idp-remote` header
+ - Paste to the end of `/var/simplesamlphp/metadata/saml20-idp-remote.php`
+4. Add the ADFS as an authentication source in `/var/simplesamlphp/authsources.php`
+ - Paste the following under the `default-sp` array
+ - Replacing the `'idp' => 'http://adfs.staging.op-bit.nz/adfs/services/trust',` with the url of your idp
+ - You can replace the name `staging-sp` with whatever you like following the naming scheme with `-sp` at the end
+ ```
+ 'staging-sp' => array(
+    'saml:SP',
+    // The entity ID of this SP.
+    // Can be NULL/unset, in which case an entity ID is generated based on the metadata URL.
+    'entityID' => null,
+    // The entity ID of the IdP this should SP should contact.
+    // Can be NULL/unset, in which case the user will be shown a list of available IdPs.
+    'idp' => 'http://adfs.staging.op-bit.nz/adfs/services/trust',
+    // The URL to the discovery service.
+    // Can be NULL/unset, in which case a builtin discovery service will be used.
+    'discoURL' => null,
+    // ADFS 2012R2 requires signing of the logout - the others are optional (may be overhead you don't want.)
+    'sign.logout' => TRUE,
+    'redirect.sign' => TRUE,
+    'assertion.encryption' => TRUE,
+    // We now need a certificate and key. The following command (executed on Linux usually)
+    // creates a self-signed cert and key, using SHA256, valid for 2 years.
+    // openssl req -x509 -nodes -sha256 -days 730 -newkey rsa:2048 -keyout my.key -out my.pem
+    'privatekey' => 'my.key',
+    'certificate' => 'my.pem',
+    // Enforce the use of SHA-256 by default.
+    'signature.algorithm' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
+    ),
+```
+ - We now need to create a certificate, for ADFS to encrypt the SAML data
+ - Run `openssl req -x509 -nodes -sha256 -days 730 -newkey rsa:2048 -keyout my.key -out my.pem`
+ - in `/var/simplesamlphp/certs`, this command generates a self signed certficate, that will last 10 years
+5. You can now get the url for your XML to pass on the the Administrator of the ADFS service you are using so they can configure there end and grant you access
+ - In the Admin Panel, Click the `Federation` Tab
+ - You will see a list of SAML 2.0 SP Metadata,
+ - Copy the `Entity ID` of the sp you created above e.g. `staging-sp`

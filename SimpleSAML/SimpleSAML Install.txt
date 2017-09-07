@@ -1,0 +1,58 @@
+# SSO Setup with SimpleSAMLphp
+
+1. Install the following packages required for SimpleSAML
+  - `sudo apt-get install apache2 php7.0 libapache2-mod-php7.0 php7.0-curl php7.0-json php7.0-mcrypt php7.0-xml php7.0-ldap php7.0-mbstring`
+2. Download the latest version of SimpleSAML from https://simplesamlphp.org/download
+  - e.g.
+  ```
+  wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v1.14.13/simplesamlphp-1.14.13.tar.gz
+  ```
+3. Extract the downloaded file -> `tar xzf simplesamlphp-1.14.13.tar.gz`
+4. Rename the extracted Folder to simplesamlphp ->  `mv simplesamlphp-1.14.13 simplesamlphp`
+5. Move the `simplesamlphp` folder to `/var` -> `mv simplesamlphp /var/`
+6. Apache needs to be configured so it can resolve simplesaml
+ - Edit `/etc/apache2/sites-available/default-ssl.conf`
+ - Add the following lines below `</Directory>`
+```
+SetEnv SIMPLESAMLPHP_CONFIG_DIR /var/simplesamlphp/config
+Alias /simplesaml /var/simplesamlphp/www
+<Directory /var/simplesamlphp/www>
+  <IfModule !mod_authz_core.c>
+  # For Apache 2.2:
+  Order allow,deny
+  Allow from all
+  </IfModule>
+  <IfModule mod_authz_core.c>
+    # For Apache 2.4:
+    Require all granted
+  </IfModule>
+</Directory>
+```
+7. Restart Apache -> `sudo service apache2 restart`
+8. Configure SimpleSAML
+ - Edit /var/simplesamlphp/config/config.php
+ - Set a password and secure the simplesaml config by modifying the following lines
+ ```
+ 'auth.adminpassword' => '123',
+ 'admin.protectindexpage' => false,
+ ```
+ To: (Replacing <SOMESECUREPASSWORD> with some secure password)
+ ```
+ 'auth.adminpassword' => '<SOMESECUREPASSWORD>',
+ 'admin.protectindexpage' => true,
+ ```
+ - Generate a secret salt -> `tr -c -d '0123456789abcdefghijklmnopqrstuvwxyz' </dev/urandom | dd bs=32 count=1 2>/dev/null;echo`
+ - Copy the value into the following line in the config
+ ```
+ 'secretsalt' => 'defaultsecretsalt',
+ ```
+ - Set the technical contact
+ ```
+ 'technicalcontact_name' => 'OP BIT Platform Project',
+ 'technicalcontact_email' => 'opbitplatform@gmail.com',
+ ```
+ - Set the timezone
+ ```
+ 'timezone' => 'Pacific/Auckland',
+ ```
+ - Save and close the config
